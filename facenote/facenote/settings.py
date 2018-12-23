@@ -25,7 +25,7 @@ SECRET_KEY = 'xn15$m_59qz5$dnp10jf^u_ynm36xx5#+daheturs&h$_r6xs1'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['47.92.165.36','127.0.0.1']
+ALLOWED_HOSTS = ['47.92.165.36', 'www.skinrec.com','127.0.0.1']
 
 
 # Application definition
