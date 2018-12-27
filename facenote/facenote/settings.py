@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/2.1/ref/settings/
 """
 
 import os
+from MongoConn import init_conn
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -80,6 +81,16 @@ DATABASES = {
         'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
     }
 }
+
+MONGODB_CONFIG = {
+    'host': '127.0.0.1',
+    'port': 27017,
+    'db_name': 'test',
+    'username': None,
+    'password': None,
+}
+
+init_conn(MONGODB_CONFIG)
 
 
 # Password validation
