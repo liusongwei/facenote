@@ -6,12 +6,15 @@ import requests
 import hashlib
 
 def get_openid(code):
-    url = "https://api.weixin.qq.com/sns/jscode2session" + "?appid=" + APPID + "&secret=" + SECRET + "&js_code=" + code + "&grant_type=authorization_code"
-    r = requests.get(url)
-    print(r.json())
-    openid = r.json()['openid']
- 
+    try:
+        url = "https://api.weixin.qq.com/sns/jscode2session" + "?appid=" + APPID + "&secret=" + SECRET + "&js_code=" + code + "&grant_type=authorization_code"
+        r = requests.get(url)
+        print(r.json())
+        openid = r.json()['openid']
+    except (Exception) as e:
+        print("get_openid: ", e)
+        raise
     return openid
 
 def get_token(openid):
-    return hashlib.md5(openid).hexdigest().upper()
+    return hashlib.md5(openid.encode('UTF-8')).hexdigest().upper()
