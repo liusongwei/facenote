@@ -135,7 +135,7 @@ STATICFILES_DIRS = [
 ]
 
 APPID = "wxd1fa6ab7d81d10e7"      # 小程序ID
-SECRET = "wait_for_laozhang"
+SECRET = "d59db949fd967bff0e30b73480edd71e"
 MCHID = ""      # 商户号
 KEY = ""
 NOTIFY_URL = ""     # 统一下单后微信回调地址，api demo见notify_view_demo.py
