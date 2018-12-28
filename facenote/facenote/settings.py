@@ -26,7 +26,7 @@ SECRET_KEY = 'xn15$m_59qz5$dnp10jf^u_ynm36xx5#+daheturs&h$_r6xs1'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['47.92.165.36', 'www.skinrec.com','127.0.0.1']
+ALLOWED_HOSTS = ['47.92.165.36', 'www.skinrec.com', '127.0.0.1', 'localhost']
 
 
 # Application definition
@@ -130,6 +130,9 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/2.1/howto/static-files/
 
 STATIC_URL = '/static/'
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, "common_static"),
+]
 
 APPID = "wxd1fa6ab7d81d10e7"      # 小程序ID
 SECRET = "wait_for_laozhang"
