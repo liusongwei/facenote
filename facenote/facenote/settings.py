@@ -11,7 +11,7 @@ https://docs.djangoproject.com/en/2.1/ref/settings/
 """
 
 import os
-from MongoConn import init_conn
+import MongoConn
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -90,7 +90,8 @@ MONGODB_CONFIG = {
     'password': None,
 }
 
-init_conn(MONGODB_CONFIG)
+MongoConn.init_conn(MONGODB_CONFIG)
+MongoConn.index_ttl()
 
 
 # Password validation

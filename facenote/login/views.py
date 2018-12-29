@@ -1,8 +1,9 @@
 from django.shortcuts import render
 from django.http import HttpResponse
-from MongoConn import *
+import MongoConn
 from facenote import wechat
-from bson import json_util
+from datetime import datetime
+from bson import json_util, objectid
 import logging
 import json
 
@@ -28,12 +29,15 @@ def test(request):
         res = {}
         print(request.POST)
         print(request.GET)
-        res['code'] = request.POST.get('code', 'defaultcode')
+        # res['token'] = request.POST.get('code', 'defaultcode')
         # res['name'] = request.POST.get('name', 'defaultname')
         # res['passwd'] = request.POST.get('passwd')
         #res['_id'] = 'asdasd123ad12'
-        #insert('skinrec', res)
+        MongoConn.insert('skinrec', res)
         # wechat.get_openid('ronghao')
-        #token = wechat.get_token('ronghao')
+        code = request.POST.get('code')
+        openid, session_key = wechat.get_openid(code)
+        token = wechat.get_token(openid + session_key)
+        res['token'] = token
         #logging.info(token)
         return HttpResponse(json_util.dumps(res,ensure_ascii=False),content_type='application/x-www-form-urlencoded;charset=utf-8')

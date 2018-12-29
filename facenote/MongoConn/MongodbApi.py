@@ -4,7 +4,7 @@ import traceback
 
 import functools
 import pymongo
-from pymongo import ReturnDocument
+from pymongo import ReturnDocument, IndexModel, DESCENDING, ASCENDING
 import logging
 import time
 
@@ -38,6 +38,17 @@ def get_conn():
 def close_conn():
     global my_conn
     my_conn.conn.close()
+
+#对数据库需要的table创建index以及设置需要的ttl，仅测试环境！！
+@graceful_auto_reconnect
+def index_ttl():
+    global my_conn
+    # log_index = IndexModel([("create_at", DESCENDING)],
+    #                         expireAfterSeconds = 60)
+    my_conn.db['token_ttl'].create_index([("create_at", DESCENDING)],
+                                            expireAfterSeconds = 60)
+
+
 
 @graceful_auto_reconnect
 def remove(table, conditions):

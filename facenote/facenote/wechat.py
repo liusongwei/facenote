@@ -11,10 +11,12 @@ def get_openid(code):
         r = requests.get(url)
         print(r.json())
         openid = r.json()['openid']
+        session_key = r.json()['session_key']
     except (Exception) as e:
         print("get_openid: ", e)
         raise
-    return openid
+    return openid, session_key
 
-def get_token(openid):
-    return hashlib.md5(openid.encode('UTF-8')).hexdigest().upper()
+def get_token(key):
+    print(key)
+    return hashlib.md5(key.encode('UTF-8')).hexdigest().upper()
