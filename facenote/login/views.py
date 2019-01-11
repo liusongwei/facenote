@@ -15,7 +15,7 @@ logging.basicConfig(
 def index(request):
     return HttpResponse("login app")
 
-def test(request):
+def login(request):
     if request.method == 'GET':
         res = {}
         print(request.GET)
@@ -33,11 +33,12 @@ def test(request):
         # res['name'] = request.POST.get('name', 'defaultname')
         # res['passwd'] = request.POST.get('passwd')
         #res['_id'] = 'asdasd123ad12'
-        MongoConn.insert('skinrec', res)
+        # MongoConn.insert('skinrec', res)
         # wechat.get_openid('ronghao')
         code = request.POST.get('code')
         openid, session_key = wechat.get_openid(code)
         token = wechat.get_token(openid + session_key)
         res['token'] = token
+        # res['user_id'] = openid
         #logging.info(token)
         return HttpResponse(json_util.dumps(res,ensure_ascii=False),content_type='application/x-www-form-urlencoded;charset=utf-8')
