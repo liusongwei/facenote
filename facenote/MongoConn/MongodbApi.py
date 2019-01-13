@@ -50,6 +50,7 @@ def index_ttl():
 
 
 
+
 @graceful_auto_reconnect
 def remove(table, conditions):
     global my_conn

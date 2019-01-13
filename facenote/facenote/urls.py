@@ -16,6 +16,7 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 from login import views as login_views
+from diary import views as diary_views
 
 from . import views
 
@@ -24,4 +25,5 @@ urlpatterns = [
     path('', views.index, name='home'),
     path('login/test', login_views.index, name='login_test'),
     path('login/', login_views.login, name='login'),
+    path('loop_picture/', diary_views.get_banner, name='get_banner'),
 ]
