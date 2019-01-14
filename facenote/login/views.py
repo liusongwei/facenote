@@ -4,6 +4,7 @@ import MongoConn
 from facenote import wechat
 from datetime import datetime
 from bson import json_util, objectid
+import datetime
 import logging
 import json
 
@@ -39,6 +40,19 @@ def login(request):
         openid, session_key = wechat.get_openid(code)
         token = wechat.get_token(openid + session_key)
         res['token'] = token
+
+        now = datetime.datetime.now()
+        # expire_time = now + datetime.timedelta(weeks = 1)
+        expire_time = now + datetime.timedelta(minutes = 5)
+        print(expire_time)
+
+        token_ttl = {}
+        token_ttl['token'] = token
+        token_ttl['openid'] = openid
+        token_ttl['expire_time'] = expire_time
+
+        MongoConn.update('token_ttl', {'openid' : openid}, {'$set' : {'expire_time' : expire_time, 'token' : token}}, True)
         # res['user_id'] = openid
         #logging.info(token)
         return HttpResponse(json_util.dumps(res,ensure_ascii=False),content_type='application/x-www-form-urlencoded;charset=utf-8')
+        

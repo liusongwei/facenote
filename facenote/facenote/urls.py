@@ -24,6 +24,9 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('', views.index, name='home'),
     path('login/test', login_views.index, name='login_test'),
-    path('login/', login_views.login, name='login'),
-    path('loop_picture/', diary_views.get_banner, name='get_banner'),
+    path('login', login_views.login, name='login'),
+    path('loop_picture', diary_views.get_banner, name='get_banner'),
+    path('image/upload', diary_views.upload_pic, name='upload_pic'),
+
+
 ]

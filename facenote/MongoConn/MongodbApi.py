@@ -46,7 +46,7 @@ def index_ttl():
     # log_index = IndexModel([("create_at", DESCENDING)],
     #                         expireAfterSeconds = 60)
     my_conn.db['token_ttl'].create_index([("create_at", DESCENDING)],
-                                            expireAfterSeconds = 60)
+                                            expireAfterSeconds = 0)
 
 
 

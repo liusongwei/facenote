@@ -158,3 +158,10 @@ SECRET = "d59db949fd967bff0e30b73480edd71e"
 MCHID = ""      # 商户号
 KEY = ""
 NOTIFY_URL = ""     # 统一下单后微信回调地址，api demo见notify_view_demo.py
+
+
+
+#ERRCODE
+OK      = 0
+UNKNOWN = -1
+UNLOGIN = -2
