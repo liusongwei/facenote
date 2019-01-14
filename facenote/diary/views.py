@@ -78,7 +78,7 @@ def upload_pic(request):
         if not os.path.exists(dir_path):
             os.makedirs(dir_path)
             
-        file_path = os.path.join(BASE_DIR, "common_static", "images", "diary", openid, today, pic_name+time+tail).replace('\\', '/')
+        file_path = os.path.join(dir_path, pic_name+time+tail).replace('\\', '/')
         destination = open(file_path, 'wb+')
 
         for chunk in pic_file.chunks():
