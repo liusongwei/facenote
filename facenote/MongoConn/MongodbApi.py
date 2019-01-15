@@ -120,6 +120,16 @@ def upsert_mary(table, datas):
         raise
 
 @graceful_auto_reconnect
+def distinct(table, key, filters=None):
+    try:
+        global my_conn
+        return my_conn.db[table].distinct(key, filters)
+    except (Exception) as e:
+        print("update: ", e)
+        raise
+        # print(value)
+
+@graceful_auto_reconnect
 def upsert_one(table, data):
     #更新插入，根据‘_id’更新一条记录，如果‘_id’的值不存在，则插入一条记录
     try:

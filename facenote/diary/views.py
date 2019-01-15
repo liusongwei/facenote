@@ -150,7 +150,9 @@ def upload_diary(request):
         MongoConn.insert('record_limit', record_limit)
 
 
-        days_num = MongoConn.find('record_limit', {'openid':openid}).distinct('date')
+        days = MongoConn.find('record_limit', {'open_id':openid}).distinct('date')
+        days_num = len(days)
+        # days_num = MongoConn.distinct('record_limit', 'date', {'open_id' : openid})
         logging.info(days_num)
         user_record = {}
         user_record['_id'] = openid
