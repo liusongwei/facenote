@@ -41,9 +41,9 @@ def login(request):
         token = wechat.get_token(openid + session_key)
         res['token'] = token
 
-        now = datetime.datetime.now()
-        # expire_time = now + datetime.timedelta(weeks = 1)
-        expire_time = now + datetime.timedelta(minutes = 5)
+        now = datetime.datetime.utcnow()
+        expire_time = now + datetime.timedelta(weeks = 1)
+        # expire_time = now + datetime.timedelta(minutes = 60)
         print(expire_time)
 
         token_ttl = {}
@@ -52,6 +52,7 @@ def login(request):
         token_ttl['expire_time'] = expire_time
 
         MongoConn.update('token_ttl', {'openid' : openid}, {'$set' : {'expire_time' : expire_time, 'token' : token}}, True)
+
         # res['user_id'] = openid
         #logging.info(token)
         return HttpResponse(json_util.dumps(res,ensure_ascii=False),content_type='application/x-www-form-urlencoded;charset=utf-8')

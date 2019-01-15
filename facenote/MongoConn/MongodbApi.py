@@ -41,12 +41,15 @@ def close_conn():
 
 #对数据库需要的table创建index以及设置需要的ttl，仅测试环境！！
 @graceful_auto_reconnect
-def index_ttl():
+def db_index():
     global my_conn
     # log_index = IndexModel([("create_at", DESCENDING)],
     #                         expireAfterSeconds = 60)
-    my_conn.db['token_ttl'].create_index([("create_at", DESCENDING)],
+    my_conn.db['token_ttl'].create_index([("expire_time", DESCENDING)],
                                             expireAfterSeconds = 0)
+    # my_conn.db['user_record'].create_index([("openid", DESCENDING)],
+    #                                         unique = True)
+                                            
 
 
 
@@ -54,14 +57,14 @@ def index_ttl():
 @graceful_auto_reconnect
 def remove(table, conditions):
     global my_conn
-    my_conn.db[table].remove(conditions)
+    return my_conn.db[table].remove(conditions)
 
 @graceful_auto_reconnect
 def save(table, value):
     # 一次操作一条记录，根据‘_id’是否存在，决定插入或更新记录
     try:
         global my_conn
-        my_conn.db[table].save(value)
+        return my_conn.db[table].save(value)
     except Exception:
         traceback.print_exc()
         raise
@@ -71,7 +74,7 @@ def insert(table, value):
     # 可以使用insert直接一次性向mongoDB插入整个列表，也可以插入单条记录，但是'_id'重复会报错
     try:
         global my_conn
-        my_conn.db[table].insert(value, continue_on_error=True)
+        return my_conn.db[table].insert(value, continue_on_error=True)
     except (Exception) as e:
         print("insert: ", e)
         raise
@@ -86,15 +89,15 @@ def insert_many(table, value, ordered=False):
         result = my_conn.db[table].insert_many(value, ordered=ordered)
         return result
     except (Exception) as e:
-        print("insert: ", e)
-        raise
-
+        pass
+        # print("insert_many: ", e)
+        # raise
 
 @graceful_auto_reconnect
 def update(table, conditions, value, s_upsert=False, s_multi=False):
     try:
         global my_conn
-        my_conn.db[table].update(conditions, value, upsert=s_upsert, multi=s_multi)
+        return my_conn.db[table].update(conditions, value, upsert=s_upsert, multi=s_multi)
     except (Exception) as e:
         print("update: ", e)
         raise
@@ -123,10 +126,10 @@ def upsert_one(table, data):
         global my_conn
         query = {'_id': data.get('_id','')}
         if not my_conn.db[table].find_one(query):
-            my_conn.db[table].insert(data)
+            return my_conn.db[table].insert(data)
         else:
             data.pop('_id') #删除'_id'键
-            my_conn.db[table].update(query, {'$set': data})
+            return my_conn.db[table].update(query, {'$set': data})
     except Exception:
         traceback.print_exc()
         raise

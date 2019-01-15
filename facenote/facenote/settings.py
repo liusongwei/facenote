@@ -91,7 +91,7 @@ MONGODB_CONFIG = {
 }
 
 MongoConn.init_conn(MONGODB_CONFIG)
-MongoConn.index_ttl()
+MongoConn.db_index()
 res = []
 banner = {}
 banner['_id'] = 1
@@ -110,6 +110,114 @@ banner['url'] = 'www.baidu.com'
 res.append(banner)
 MongoConn.upsert_mary('banner', res)
 
+effect_tags = [
+    {
+        '_id' : '去细纹',
+        'use_count' : 0
+    },
+    {
+        '_id' : '祛黑头',
+        'use_count' : 0
+    },
+    {
+        '_id' : '祛痘',
+        'use_count' : 0
+    },
+    {
+        '_id' : '收毛孔',
+        'use_count' : 0
+    },
+    {
+        '_id' : '补水保湿',
+        'use_count' : 0
+    },
+    {
+        '_id' : '祛疤',
+        'use_count' : 0
+    },
+    {
+        '_id' : '抗敏感',
+        'use_count' : 0
+    },
+    {
+        '_id' : '抗衰老',
+        'use_count' : 0
+    },
+    {
+        '_id' : '紧致',
+        'use_count' : 0
+    },
+    {
+        '_id' : '抗氧化',
+        'use_count' : 0
+    },
+    {
+        '_id' : '缓解毛周角边',
+        'use_count' : 0
+    },
+    {
+        '_id' : '清洁',
+        'use_count' : 0
+    }
+]
+
+summary_tags = [
+    {
+        '_id' : '吃辣',
+        'use_count' : 0
+    },
+    {
+        '_id' : '牛羊肉',
+        'use_count' : 0
+    },
+    {
+        '_id' : '运动',
+        'use_count' : 0
+    },
+    {
+        '_id' : '煲汤喝',
+        'use_count' : 0
+    },
+    {
+        '_id' : '油炸食品',
+        'use_count' : 0
+    },
+    {
+        '_id' : '无感',
+        'use_count' : 0
+    },
+    {
+        '_id' : '熬夜',
+        'use_count' : 0
+    },
+    {
+        '_id' : '暴晒',
+        'use_count' : 0
+    },
+    {
+        '_id' : '喝酒',
+        'use_count' : 0
+    },
+    {
+        '_id' : '香菜',
+        'use_count' : 0
+    },
+    {
+        '_id' : '美容spa',
+        'use_count' : 0
+    },
+    {
+        '_id' : '未卸妆',
+        'use_count' : 0
+    },
+    {
+        '_id' : '过敏',
+        'use_count' : 0
+    }
+]
+
+MongoConn.insert_many('effect_tags', effect_tags)
+MongoConn.insert_many('summary_tags', summary_tags)
 
 
 # Password validation
@@ -165,3 +273,4 @@ NOTIFY_URL = ""     # 统一下单后微信回调地址，api demo见notify_view
 OK      = 0
 UNKNOWN = -1
 UNLOGIN = -2
+PARAMERR = -3
