@@ -91,7 +91,27 @@ def upload_pic(request):
         res['url'] = os.path.join("images", "diary", openid, today, pic_name+time+tail).replace('\\', '/')
         return HttpResponse(json_util.dumps(res,ensure_ascii=False),content_type='application/x-www-form-urlencoded;charset=utf-8')
 
-def upload_diary(request):
+def user_record(request):
+    if request.method == 'GET':
+        res = {}
+        token = request.GET.get('token')
+        db = MongoConn.find_one('token_ttl', {'token' : token})
+        if not db:
+            res['errcode'] = UNLOGIN
+            return HttpResponse(json_util.dumps(res,ensure_ascii=False),content_type='application/x-www-form-urlencoded;charset=utf-8')
+        openid = db.get('openid')
+
+        db_record = MongoConn.find_one('user_record', {'_id' : openid})
+        res['pic_num'] = db_record['record_pic_num']
+        res['day_count'] = db_record['record_days_num']
+        res['product_count'] = db_record['product_record_num']
+        last_record_time = db_record['last_record_time'] + datetime.timedelta(hours = 8)
+        res['last_record_time'] = int(time.mktime(last_record_time.timetuple()))
+
+        return HttpResponse(json_util.dumps(res,ensure_ascii=False),content_type='application/x-www-form-urlencoded;charset=utf-8')
+
+
+def upload_product_record(request):
     if request.method == 'POST':
         res = {}
         # logging.info(request.POST)
@@ -169,7 +189,7 @@ def upload_diary(request):
         else:
             db_record['product_record_num'] += 1
             # days_num = MongoConn.find_one('record_limit', {'openid':openid, 'product_record_id':product_record_id, 'date':date})
-            db_record['record_days_num'] += 1
+            db_record['record_days_num'] = days_num
             db_record['record_pic_num'] += len(skin_images)
             db_record['product_record'].append(str(product_record_id))
             db_record['last_record_time'] = datetime.datetime.utcnow()
