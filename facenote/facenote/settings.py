@@ -152,7 +152,7 @@ effect_tags = [
         'use_count' : 0
     },
     {
-        '_id' : '缓解毛周角边',
+        '_id' : '缓解毛周角化',
         'use_count' : 0
     },
     {
