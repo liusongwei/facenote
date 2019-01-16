@@ -1,6 +1,7 @@
 from django.shortcuts import render
 from django.http import HttpResponse
 from facenote.settings import UNKNOWN, UNLOGIN, OK, PARAMERR, PUBLISHLIMIT
+from pymongo import DESCENDING, ASCENDING
 import os
 import MongoConn
 from facenote import wechat
@@ -145,6 +146,8 @@ def upload_product_record(request):
             return HttpResponse(json_util.dumps(res,ensure_ascii=False),content_type='application/x-www-form-urlencoded;charset=utf-8')
         openid = db.get('openid')
 
+        update_tags_frequency(product_tags, summary_tags)
+
         today = datetime.datetime.now().strftime("%Y%m%d")
         skin_record = {}
         skin_record['pics'] = skin_images
@@ -229,6 +232,25 @@ def update_publish_limit(openid, product_record_id, skin_record_id):
     record_limit['date'] = today
     MongoConn.insert('record_limit', record_limit)
 
+def update_tags_frequency(effect_tags, summary_tags):
+    if effect_tags:
+        for tag in effect_tags:
+            if MongoConn.find_one('effect_tags', {'_id' : str(tag)}):
+                MongoConn.update('effect_tags', {'_id' : str(tag)}, {'$inc' : {'use_count' : 1}})
+            else:
+                res = {}
+                res['_id'] = str(tag)
+                res['use_count'] = 1
+                MongoConn.insert('effect_tags', res)
+    if summary_tags:
+        for tag in summary_tags:
+            if MongoConn.find_one('summary_tags', {'_id' : str(tag)}):
+                MongoConn.update('summary_tags', {'_id' : str(tag)}, {'$inc' : {'use_count' : 1}})
+            else:
+                res = {}
+                res['_id'] = str(tag)
+                res['use_count'] = 1
+                MongoConn.insert('summary_tags', res)
 
 def upload_skin_record(request):
     if request.method == 'POST':
@@ -249,6 +271,8 @@ def upload_skin_record(request):
             res['errcode'] = UNLOGIN
             return HttpResponse(json_util.dumps(res,ensure_ascii=False),content_type='application/x-www-form-urlencoded;charset=utf-8')
         openid = db.get('openid')
+
+        update_tags_frequency(None, summary_tags)
 
         # today = datetime.datetime.now().strftime("%Y%m%d")
         if not check_publish_limit(openid, product_record_id):
@@ -313,4 +337,27 @@ def use_record_list(request):
 
         return HttpResponse(json_util.dumps(res,ensure_ascii=False),content_type='application/x-www-form-urlencoded;charset=utf-8')
 
+def get_hot_tags(request):
+    if request.method == 'GET':
+        res = {}
+        token = request.GET.get('token', None)
+        db = MongoConn.find_one('token_ttl', {'token' : token})
+        if not db:
+            tmp = {}
+            tmp['errcode'] = UNLOGIN
+            return HttpResponse(json_util.dumps(tmp,ensure_ascii=False),content_type='application/x-www-form-urlencoded;charset=utf-8')
 
+        effect_tags = MongoConn.find('effect_tags', None).sort('use_count', DESCENDING).limit(15)
+        summary_tags = MongoConn.find('summary_tags', None).sort('use_count', DESCENDING).limit(15)
+
+        res['effect_tags'] = []
+        res['summary_tags'] = []
+
+        for tag in effect_tags:
+            res['effect_tags'].append(tag.get('_id', None))
+        for tag in summary_tags:
+            res['summary_tags'].append(tag.get('_id', None))
+
+        res['errcode'] = OK
+
+        return HttpResponse(json_util.dumps(res,ensure_ascii=False),content_type='application/x-www-form-urlencoded;charset=utf-8')
