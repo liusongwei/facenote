@@ -1,6 +1,6 @@
 from django.shortcuts import render
 from django.http import HttpResponse
-from facenote.settings import UNKNOWN, UNLOGIN, OK, PARAMERR
+from facenote.settings import UNKNOWN, UNLOGIN, OK, PARAMERR, PUBLISHLIMIT
 import os
 import MongoConn
 from facenote import wechat
@@ -94,7 +94,7 @@ def upload_pic(request):
 def user_record(request):
     if request.method == 'GET':
         res = {}
-        token = request.GET.get('token')
+        token = request.GET.get('token', None)
         db = MongoConn.find_one('token_ttl', {'token' : token})
         if not db:
             res['errcode'] = UNLOGIN
@@ -102,11 +102,15 @@ def user_record(request):
         openid = db.get('openid')
 
         db_record = MongoConn.find_one('user_record', {'_id' : openid})
-        res['pic_num'] = db_record['record_pic_num']
-        res['day_count'] = db_record['record_days_num']
-        res['product_count'] = db_record['product_record_num']
-        last_record_time = db_record['last_record_time'] + datetime.timedelta(hours = 8)
-        res['last_record_time'] = int(time.mktime(last_record_time.timetuple()))
+        res['pic_num'] = db_record.get('record_pic_num', 0)
+        res['day_count'] = db_record.get('record_days_num', 0)
+        res['product_count'] = db_record.get('product_record_num', 0)
+        db_time = db_record.get('last_record_time', None)
+        if db_time:
+            last_record_time = db_time + datetime.timedelta(hours = 8)
+            res['last_record_time'] = int(time.mktime(last_record_time.timetuple()))
+        else:
+            res['last_record_time'] = 0
 
         return HttpResponse(json_util.dumps(res,ensure_ascii=False),content_type='application/x-www-form-urlencoded;charset=utf-8')
 
@@ -124,14 +128,14 @@ def upload_product_record(request):
 
         req = json.loads(request.body)
         logging.info(req)
-        token = req['token']
-        product_name = req['product_name']
-        product_image = req['product_image']
-        product_tags = req['product_tags']
-        skin_images = req['skin_images']
-        summary_tags = req['summary_tags']
+        token = req.get('token', None)
+        product_name = req.get('product_name', None)
+        product_image = req.get('product_image', None)
+        product_tags = req.get('product_tags', None)
+        skin_images = req.get('skin_images', None)
+        summary_tags = req.get('summary_tags', None)
 
-        if not product_name or not product_image or not skin_images or len(skin_images) < 1:
+        if not product_name or not product_image or not skin_images or len(skin_images) < 1 or len(skin_images) > 2:
             res['errcode'] = PARAMERR
             return HttpResponse(json_util.dumps(res,ensure_ascii=False),content_type='application/x-www-form-urlencoded;charset=utf-8')
 
@@ -145,7 +149,8 @@ def upload_product_record(request):
         skin_record = {}
         skin_record['pics'] = skin_images
         skin_record['tags'] = summary_tags
-        skin_record['create_time'] = today
+        # skin_record['create_time'] = today
+        skin_record['create_time'] = datetime.datetime.utcnow()
 
         skin_record_id = MongoConn.insert('skin_record', skin_record)
 
@@ -158,16 +163,20 @@ def upload_product_record(request):
         product_record['tags'] = product_tags
         product_record['skin_record'] = []
         product_record['skin_record'].append(str(skin_record_id))
+        product_record['create_time'] = datetime.datetime.utcnow()
+        
 
         product_record_id = MongoConn.insert('product_record', product_record)
 
-        record_limit = {}
-        record_limit['open_id'] = openid
-        record_limit['product_record_id'] = str(product_record_id)
-        record_limit['skin_record_id'] = str(skin_record_id)
-        record_limit['date'] = today
+        update_publish_limit(openid, product_record_id, skin_record_id)
 
-        MongoConn.insert('record_limit', record_limit)
+        # record_limit = {}
+        # record_limit['open_id'] = openid
+        # record_limit['product_record_id'] = str(product_record_id)
+        # record_limit['skin_record_id'] = str(skin_record_id)
+        # record_limit['date'] = today
+
+        # MongoConn.insert('record_limit', record_limit)
 
 
         days = MongoConn.find('record_limit', {'open_id':openid}).distinct('date')
@@ -203,9 +212,105 @@ def upload_product_record(request):
         return HttpResponse(json_util.dumps(res,ensure_ascii=False),content_type='application/x-www-form-urlencoded;charset=utf-8')
 
 #返回真说明check通过，可以添加skin_record
-def check_publish_limit(openid, product_record_id, date):
-    res = MongoConn.find_one('record_limit', {'openid':openid, 'product_record_id':product_record_id, 'date':date})
+def check_publish_limit(openid, product_record_id):
+    today = datetime.datetime.now().strftime("%Y%m%d")
+    res = MongoConn.find_one('record_limit', {'open_id':openid, 'product_record_id':product_record_id, 'date':today})
     if res:
         return False
     else:
         return True
+
+def update_publish_limit(openid, product_record_id, skin_record_id):
+    today = datetime.datetime.now().strftime("%Y%m%d")
+    record_limit = {}
+    record_limit['open_id'] = openid
+    record_limit['product_record_id'] = str(product_record_id)
+    record_limit['skin_record_id'] = str(skin_record_id)
+    record_limit['date'] = today
+    MongoConn.insert('record_limit', record_limit)
+
+
+def upload_skin_record(request):
+    if request.method == 'POST':
+        res = {}
+        req = json.loads(request.body)
+        logging.info(req)
+        token = req.get('token', None)
+        product_record_id = req.get('product_record_id', None)
+        skin_images = req.get('skin_images', None)
+        summary_tags = req.get('summary_tags', None)
+
+        if not token or not product_record_id or not skin_images or len(skin_images) < 1 or len(skin_images) > 2:
+            res['errcode'] = PARAMERR
+            return HttpResponse(json_util.dumps(res,ensure_ascii=False),content_type='application/x-www-form-urlencoded;charset=utf-8')
+
+        db = MongoConn.find_one('token_ttl', {'token' : token})
+        if not db:
+            res['errcode'] = UNLOGIN
+            return HttpResponse(json_util.dumps(res,ensure_ascii=False),content_type='application/x-www-form-urlencoded;charset=utf-8')
+        openid = db.get('openid')
+
+        # today = datetime.datetime.now().strftime("%Y%m%d")
+        if not check_publish_limit(openid, product_record_id):
+            res['errcode'] = PUBLISHLIMIT
+            return HttpResponse(json_util.dumps(res,ensure_ascii=False),content_type='application/x-www-form-urlencoded;charset=utf-8')
+
+        skin_record = {}
+        skin_record['pics'] = skin_images
+        skin_record['tags'] = summary_tags
+        # skin_record['create_time'] = today
+        skin_record['create_time'] = datetime.datetime.utcnow()
+
+        skin_record_id = MongoConn.insert('skin_record', skin_record)
+
+        db_product_record = MongoConn.find_one('product_record', {'_id' : ObjectId(product_record_id)})
+        db_skin_record_list = db_product_record.get('skin_record', None)
+        if db_skin_record_list:
+            db_skin_record_list.append(str(skin_record_id))
+            MongoConn.save('product_record', db_product_record)
+        else:
+            res['errcode'] = PARAMERR
+            return HttpResponse(json_util.dumps(res,ensure_ascii=False),content_type='application/x-www-form-urlencoded;charset=utf-8')
+
+
+        update_publish_limit(openid, product_record_id, skin_record_id)
+
+        res['errcode'] = OK
+        return HttpResponse(json_util.dumps(res,ensure_ascii=False),content_type='application/x-www-form-urlencoded;charset=utf-8')
+
+def use_record_list(request):
+    if request.method == 'GET':
+        res = []
+        token = request.GET.get('token', None)
+        db = MongoConn.find_one('token_ttl', {'token' : token})
+        if not db:
+            tmp = {}
+            tmp['errcode'] = UNLOGIN
+            return HttpResponse(json_util.dumps(tmp,ensure_ascii=False),content_type='application/x-www-form-urlencoded;charset=utf-8')
+        openid = db.get('openid')
+
+        product_record_list = MongoConn.find_one('user_record', {'_id' : openid}).get('product_record', None)
+        if not product_record_list:
+            return HttpResponse(json_util.dumps(res,ensure_ascii=False),content_type='application/x-www-form-urlencoded;charset=utf-8')
+
+        logging.info(product_record_list)
+        for product_record_id in product_record_list:
+            logging.info(product_record_id)
+            product_record = MongoConn.find_one('product_record', {'_id' : ObjectId(product_record_id)})
+            if product_record:
+                logging.info(product_record)
+                tmp = {}
+                tmp['product_id'] = product_record_id
+                tmp['product_name'] = product_record.get('name', None)
+                tmp['product_image'] = product_record.get('image', None)
+                db_create_time = product_record.get('create_time', None)
+                if not db_create_time:
+                    tmp['create_time'] = None
+                else:
+                    create_time = db_create_time + datetime.timedelta(hours = 8)
+                    tmp['create_time'] = int(time.mktime(create_time.timetuple()))
+                res.append(tmp)
+
+        return HttpResponse(json_util.dumps(res,ensure_ascii=False),content_type='application/x-www-form-urlencoded;charset=utf-8')
+
+

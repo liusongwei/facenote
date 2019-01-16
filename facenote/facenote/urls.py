@@ -27,6 +27,8 @@ urlpatterns = [
     path('login', login_views.login, name='login'),
     path('loop_picture', diary_views.get_banner, name='get_banner'),
     path('image/upload', diary_views.upload_pic, name='upload_pic'),
-    path('upload_record', diary_views.upload_product_record, name='upload_product_record'),
+    path('upload_product_record', diary_views.upload_product_record, name='upload_product_record'),
+    path('upload_skin_record', diary_views.upload_skin_record, name='upload_skin_record'),
     path('user_record', diary_views.user_record, name='user_record'),
+    path('use_record_list', diary_views.use_record_list, name='use_record_list'),
 ]
