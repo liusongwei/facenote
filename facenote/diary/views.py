@@ -302,7 +302,7 @@ def upload_skin_record(request):
         res['errcode'] = OK
         return HttpResponse(json_util.dumps(res,ensure_ascii=False),content_type='application/x-www-form-urlencoded;charset=utf-8')
 
-def use_record_list(request):
+def user_record_list(request):
     if request.method == 'GET':
         res = []
         token = request.GET.get('token', None)
@@ -333,6 +333,33 @@ def use_record_list(request):
                 else:
                     create_time = db_create_time + datetime.timedelta(hours = 8)
                     tmp['create_time'] = int(time.mktime(create_time.timetuple()))
+
+                db_skin_record_list = product_record.get('skin_record', None)
+                skin_record_len = len(db_skin_record_list)
+                skin_record_new_id = db_skin_record_list[0]
+                skin_record_old_id = db_skin_record_list[skin_record_len - 1]
+
+                skin_record_new = MongoConn.find_one('skin_record', {'_id' : ObjectId(skin_record_new_id)})
+                skin_record_old = MongoConn.find_one('skin_record', {'_id' : ObjectId(skin_record_old_id)})
+
+                if skin_record_new and skin_record_old:
+                    tmp['skin_record'] = {}
+                    tmp['skin_record']['skin_record_new_iamge'] = skin_record_new.get('pics')[0]
+                    skin_record_db_create_time = skin_record_new.get('create_time', None)
+                    if not skin_record_db_create_time:
+                        tmp['skin_record']['skin_record_new_create_time'] = None
+                    else:
+                        skin_record_new_create_time = skin_record_db_create_time + datetime.timedelta(hours = 8)
+                        tmp['skin_record']['skin_record_new_create_time'] = int(time.mktime(skin_record_new_create_time.timetuple()))
+
+                    tmp['skin_record']['skin_record_old_iamge'] = skin_record_old.get('pics')[0]
+                    skin_record_db_create_time = skin_record_old.get('create_time', None)
+                    if not skin_record_db_create_time:
+                        tmp['skin_record']['skin_record_old_create_time'] = None
+                    else:
+                        skin_record_old_create_time = skin_record_db_create_time + datetime.timedelta(hours = 8)
+                        tmp['skin_record']['skin_record_old_create_time'] = int(time.mktime(skin_record_old_create_time.timetuple()))
+                
                 res.append(tmp)
 
         return HttpResponse(json_util.dumps(res,ensure_ascii=False),content_type='application/x-www-form-urlencoded;charset=utf-8')
@@ -360,4 +387,38 @@ def get_hot_tags(request):
 
         res['errcode'] = OK
 
+        return HttpResponse(json_util.dumps(res,ensure_ascii=False),content_type='application/x-www-form-urlencoded;charset=utf-8')
+
+def get_compare_pics(request):
+    if request.method == 'GET':
+        res = []
+        token = request.GET.get('token', None)
+        product_id = request.GET.get('product_id', None)
+
+        db = MongoConn.find_one('token_ttl', {'token' : token})
+        if not db:
+            tmp = {}
+            tmp['errcode'] = UNLOGIN
+            return HttpResponse(json_util.dumps(tmp,ensure_ascii=False),content_type='application/x-www-form-urlencoded;charset=utf-8')
+
+        product_record = MongoConn.find_one('product_record', {'_id' : ObjectId(product_id)})
+        if not product_record:
+            tmp = {}
+            tmp['errcode'] = UNKNOWN
+            return HttpResponse(json_util.dumps(tmp,ensure_ascii=False),content_type='application/x-www-form-urlencoded;charset=utf-8')
+
+        db_skin_record_id_list = product_record.get('skin_record', None)
+        for skin_record_id in db_skin_record_id_list:
+            skin_record = MongoConn.find_one('skin_record', {'_id' : ObjectId(skin_record_id)})
+            tmp = {}
+            tmp['skin_record_id'] = str(skin_record.get('_id'))
+            tmp['image'] = skin_record.get('pics')[0]
+            skin_record_db_create_time = skin_record.get('create_time', None)
+            if not skin_record_db_create_time:
+                tmp['create_time'] = None
+            else:
+                skin_record_create_time = skin_record_db_create_time + datetime.timedelta(hours = 8)
+                tmp['create_time'] = int(time.mktime(skin_record_create_time.timetuple()))
+            res.append(tmp)
+        
         return HttpResponse(json_util.dumps(res,ensure_ascii=False),content_type='application/x-www-form-urlencoded;charset=utf-8')

@@ -30,6 +30,7 @@ urlpatterns = [
     path('upload_product_record', diary_views.upload_product_record, name='upload_product_record'),
     path('upload_skin_record', diary_views.upload_skin_record, name='upload_skin_record'),
     path('user_record', diary_views.user_record, name='user_record'),
-    path('use_record_list', diary_views.use_record_list, name='use_record_list'),
+    path('user_record_list', diary_views.user_record_list, name='user_record_list'),
     path('get_hot_tags', diary_views.get_hot_tags, name='get_hot_tags'),
+    path('get_compare_pics', diary_views.get_compare_pics, name='get_compare_pics'),
 ]
