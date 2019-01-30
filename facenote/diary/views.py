@@ -109,6 +109,7 @@ def user_record(request):
         db_time = db_record.get('last_record_time', None)
         if db_time:
             last_record_time = db_time + datetime.timedelta(hours = 8)
+            # last_record_time = db_time
             res['last_record_time'] = int(time.mktime(last_record_time.timetuple()))
         else:
             res['last_record_time'] = 0
@@ -327,11 +328,13 @@ def user_record_list(request):
                 tmp['product_id'] = product_record_id
                 tmp['product_name'] = product_record.get('name', None)
                 tmp['product_image'] = product_record.get('image', None)
+                tmp['product_tags'] = product_record.get('tags', None)
                 db_create_time = product_record.get('create_time', None)
                 if not db_create_time:
                     tmp['create_time'] = None
                 else:
                     create_time = db_create_time + datetime.timedelta(hours = 8)
+                    # create_time = db_create_time  
                     tmp['create_time'] = int(time.mktime(create_time.timetuple()))
 
                 db_skin_record_list = product_record.get('skin_record', None)
@@ -350,6 +353,7 @@ def user_record_list(request):
                         tmp['skin_record']['skin_record_new_create_time'] = None
                     else:
                         skin_record_new_create_time = skin_record_db_create_time + datetime.timedelta(hours = 8)
+                        # skin_record_new_create_time = skin_record_db_create_time
                         tmp['skin_record']['skin_record_new_create_time'] = int(time.mktime(skin_record_new_create_time.timetuple()))
 
                     tmp['skin_record']['skin_record_old_iamge'] = skin_record_old.get('pics')[0]
@@ -358,6 +362,7 @@ def user_record_list(request):
                         tmp['skin_record']['skin_record_old_create_time'] = None
                     else:
                         skin_record_old_create_time = skin_record_db_create_time + datetime.timedelta(hours = 8)
+                        # skin_record_old_create_time = skin_record_db_create_time
                         tmp['skin_record']['skin_record_old_create_time'] = int(time.mktime(skin_record_old_create_time.timetuple()))
                 
                 res.append(tmp)
@@ -418,6 +423,7 @@ def get_compare_pics(request):
                 tmp['create_time'] = None
             else:
                 skin_record_create_time = skin_record_db_create_time + datetime.timedelta(hours = 8)
+                # skin_record_create_time = skin_record_db_create_time
                 tmp['create_time'] = int(time.mktime(skin_record_create_time.timetuple()))
             res.append(tmp)
         
