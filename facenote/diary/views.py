@@ -77,7 +77,7 @@ def upload_pic(request):
         time = datetime.datetime.now().strftime("%H%M%S")
         
         logging.info(pic_file.name)
-        tail = '.' + pic_file.name.split('.')[1]
+        tail = '.' + pic_file.name.split('.')[-1]
         dir_path = os.path.join(BASE_DIR, "common_static", "images", "diary", openid, today).replace('\\', '/')
         if not os.path.exists(dir_path):
             os.makedirs(dir_path)
