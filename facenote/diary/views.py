@@ -76,6 +76,7 @@ def upload_pic(request):
         today = datetime.datetime.now().strftime("%Y%m%d")
         time = datetime.datetime.now().strftime("%H%M%S")
         
+        logging.info(pic_file.name)
         tail = '.' + pic_file.name.split('.')[1]
         dir_path = os.path.join(BASE_DIR, "common_static", "images", "diary", openid, today).replace('\\', '/')
         if not os.path.exists(dir_path):
@@ -333,7 +334,9 @@ def user_record_list(request):
                 if not db_create_time:
                     tmp['create_time'] = None
                 else:
+                    # logging.info(create_time)
                     create_time = db_create_time + datetime.timedelta(hours = 8)
+                    # logging.info(create_time)
                     # create_time = db_create_time  
                     tmp['create_time'] = int(time.mktime(create_time.timetuple()))
 
