@@ -58,15 +58,17 @@ def upload_pic(request):
     if request.method == 'POST':
         res = {}
         logging.info(request.POST)
-        token = request.GET.get('token')
+        token = request.POST.get('token')
         pic_name = request.GET.get('name')
         pic_file = request.FILES.get(pic_name)
+        logging.info(token)
 
-        db = MongoConn.find_one('token_ttl', None, {'token' : token})
+        db = MongoConn.find_one('token_ttl', {'token' : token})
         if not db:
             res['errcode'] = UNLOGIN
             return HttpResponse(json_util.dumps(res,ensure_ascii=False),content_type='application/x-www-form-urlencoded;charset=utf-8')
         openid = db.get('openid')
+        logging.info(openid)
 
         if not pic_file:
             res['errcode'] = UNKNOWN
@@ -79,6 +81,7 @@ def upload_pic(request):
         logging.info(pic_file.name)
         tail = '.' + pic_file.name.split('.')[-1]
         dir_path = os.path.join(BASE_DIR, "common_static", "images", "diary", openid, today).replace('\\', '/')
+        logging.info(dir_path)
         if not os.path.exists(dir_path):
             os.makedirs(dir_path)
             
@@ -150,7 +153,7 @@ def upload_product_record(request):
 
         update_tags_frequency(product_tags, summary_tags)
 
-        today = datetime.datetime.now().strftime("%Y%m%d")
+        # today = datetime.datetime.now().strftime("%Y%m%d")
         skin_record = {}
         skin_record['pics'] = skin_images
         skin_record['tags'] = summary_tags
