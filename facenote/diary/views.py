@@ -417,7 +417,7 @@ def get_compare_pics(request):
             return HttpResponse(json_util.dumps(tmp,ensure_ascii=False),content_type='application/x-www-form-urlencoded;charset=utf-8')
 
         db_skin_record_id_list = product_record.get('skin_record', None)
-        db_skin_record_id_list.reverse()
+        # db_skin_record_id_list.reverse()
         for skin_record_id in db_skin_record_id_list:
             skin_record = MongoConn.find_one('skin_record', {'_id' : ObjectId(skin_record_id)})
             tmp = {}
