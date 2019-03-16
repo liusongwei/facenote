@@ -426,6 +426,7 @@ def get_compare_pics(request):
             tmp = {}
             tmp['skin_record_id'] = str(skin_record.get('_id'))
             tmp['image'] = skin_record.get('pics')[0]
+            tmp['tags'] = skin_record.get('tags')
             skin_record_db_create_time = skin_record.get('create_time', None)
             if not skin_record_db_create_time:
                 tmp['create_time'] = None
