@@ -172,6 +172,7 @@ def upload_product_record(request):
         product_record['skin_record'] = []
         product_record['skin_record'].append(str(skin_record_id))
         product_record['create_time'] = datetime.datetime.utcnow()
+        product_record['update_time'] = datetime.datetime.utcnow()
         
 
         product_record_id = MongoConn.insert('product_record', product_record)
@@ -301,6 +302,8 @@ def upload_skin_record(request):
             res['errcode'] = PARAMERR
             return HttpResponse(json_util.dumps(res,ensure_ascii=False),content_type='application/x-www-form-urlencoded;charset=utf-8')
 
+        db_product_record['update_time'] = datetime.datetime.utcnow()
+        MongoConn.save('product_record', db_product_record)
 
         update_publish_limit(openid, product_record_id, skin_record_id)
 
@@ -322,13 +325,29 @@ def user_record_list(request):
         if not product_record_list:
             return HttpResponse(json_util.dumps(res,ensure_ascii=False),content_type='application/x-www-form-urlencoded;charset=utf-8')
 
-        logging.info(product_record_list)
+        # logging.info(product_record_list)
         product_record_list.reverse()
+
+        product_record_list_order = {}
+        product_record_list_local = {}
         for product_record_id in product_record_list:
-            logging.info(product_record_id)
             product_record = MongoConn.find_one('product_record', {'_id' : ObjectId(product_record_id)})
             if product_record:
-                logging.info(product_record)
+                product_record_list_local[product_record_id] = product_record
+                db_create_time = product_record.get('create_time', None)
+                db_update_time = product_record.get('update_time', db_create_time)
+                product_record_list_order[product_record_id] = int(time.mktime(db_update_time.timetuple()))
+
+        product_record_list_ordered = sorted(product_record_list_order.items(),key = lambda x:x[1],reverse = True)
+        logging.info(product_record_list_ordered)
+
+        for item in product_record_list_ordered:
+            product_record_id = item[0]
+            logging.info(product_record_id)
+            # product_record = MongoConn.find_one('product_record', {'_id' : ObjectId(product_record_id)})
+            product_record = product_record_list_local[product_record_id]
+            if product_record:
+                # logging.info(product_record)
                 tmp = {}
                 tmp['product_id'] = product_record_id
                 tmp['product_name'] = product_record.get('name', None)
@@ -338,11 +357,15 @@ def user_record_list(request):
                 if not db_create_time:
                     tmp['create_time'] = None
                 else:
-                    # logging.info(create_time)
                     create_time = db_create_time + datetime.timedelta(hours = 8)
-                    # logging.info(create_time)
-                    # create_time = db_create_time  
                     tmp['create_time'] = int(time.mktime(create_time.timetuple()))
+                
+                db_update_time = product_record.get('update_time', None)
+                if not db_update_time:
+                    tmp['update_time'] = tmp['create_time']
+                else:
+                    update_time = db_update_time + datetime.timedelta(hours = 8)
+                    tmp['update_time'] = int(time.mktime(update_time.timetuple()))
 
                 db_skin_record_list = product_record.get('skin_record', None)
                 skin_record_len = len(db_skin_record_list)

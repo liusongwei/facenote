@@ -28,15 +28,9 @@ def login(request):
         
     if request.method == 'POST':
         res = {}
-        print(request.POST)
-        print(request.GET)
-        # res['token'] = request.POST.get('code', 'defaultcode')
-        # res['name'] = request.POST.get('name', 'defaultname')
-        # res['passwd'] = request.POST.get('passwd')
-        #res['_id'] = 'asdasd123ad12'
-        # MongoConn.insert('skinrec', res)
-        # wechat.get_openid('ronghao')
+        
         code = request.POST.get('code')
+        logging.info(code)
         openid, session_key = wechat.get_openid(code)
         token = wechat.get_token(openid + session_key)
         res['token'] = token
@@ -54,6 +48,6 @@ def login(request):
         MongoConn.update('token_ttl', {'openid' : openid}, {'$set' : {'expire_time' : expire_time, 'token' : token}}, True)
 
         # res['user_id'] = openid
-        #logging.info(token)
+        logging.info(token)
         return HttpResponse(json_util.dumps(res,ensure_ascii=False),content_type='application/x-www-form-urlencoded;charset=utf-8')
         
