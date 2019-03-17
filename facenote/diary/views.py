@@ -307,6 +307,30 @@ def upload_skin_record(request):
 
         update_publish_limit(openid, product_record_id, skin_record_id)
 
+        days = MongoConn.find('record_limit', {'open_id':openid}).distinct('date')
+        days_num = len(days)
+        # days_num = MongoConn.distinct('record_limit', 'date', {'open_id' : openid})
+        logging.info(days_num)
+        user_record = {}
+        user_record['_id'] = openid
+        user_record['product_record_num'] = 1
+        user_record['record_days_num'] = days_num
+        user_record['record_pic_num'] = len(skin_images)
+        user_record['product_record'] = []
+        user_record['product_record'].append(str(product_record_id))
+        user_record['last_record_time'] = datetime.datetime.utcnow()
+
+        db_record = MongoConn.find_one('user_record', {'_id' : openid})
+        if not db_record:
+            MongoConn.insert('user_record', user_record)
+        else:
+            # days_num = MongoConn.find_one('record_limit', {'openid':openid, 'product_record_id':product_record_id, 'date':date})
+            db_record['record_days_num'] = days_num
+            db_record['record_pic_num'] += len(skin_images)
+            db_record['last_record_time'] = datetime.datetime.utcnow()
+
+            MongoConn.save('user_record', db_record)
+
         res['errcode'] = OK
         return HttpResponse(json_util.dumps(res,ensure_ascii=False),content_type='application/x-www-form-urlencoded;charset=utf-8')
 

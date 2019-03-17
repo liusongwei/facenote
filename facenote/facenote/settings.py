@@ -95,17 +95,17 @@ MongoConn.db_index()
 res = []
 banner = {}
 banner['_id'] = 1
-banner['image'] = '1.png'
+banner['image'] = '1.jpg'
 banner['url'] = 'www.baidu.com'
 res.append(banner)
 banner = {}
 banner['_id'] = 2
-banner['image'] = '2.png'
+banner['image'] = '2.jpg'
 banner['url'] = 'www.baidu.com'
 res.append(banner)
 banner = {}
 banner['_id'] = 3
-banner['image'] = '3.png'
+banner['image'] = '3.jpg'
 banner['url'] = 'www.baidu.com'
 res.append(banner)
 MongoConn.upsert_mary('banner', res)
