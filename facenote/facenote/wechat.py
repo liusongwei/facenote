@@ -8,6 +8,7 @@ import hashlib
 def get_openid(code):
     try:
         url = "https://api.weixin.qq.com/sns/jscode2session" + "?appid=" + APPID + "&secret=" + SECRET + "&js_code=" + code + "&grant_type=authorization_code"
+        print(url)
         r = requests.get(url)
         print(r.json())
         openid = r.json()['openid']

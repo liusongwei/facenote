@@ -261,8 +261,10 @@ STATICFILES_DIRS = [
     os.path.join(BASE_DIR, "common_static"),
 ]
 
-APPID = "wxd1fa6ab7d81d10e7"      # 小程序ID
-SECRET = "d59db949fd967bff0e30b73480edd71e"
+#APPID = "wxd1fa6ab7d81d10e7"      # 小程序ID
+#SECRET = "d59db949fd967bff0e30b73480edd71e"
+APPID = "wxecb7ebcfdcfbb1a0"      # 小程序ID
+SECRET = "bffee17d7564e1dc4cea5fe9f7471344"
 MCHID = ""      # 商户号
 KEY = ""
 NOTIFY_URL = ""     # 统一下单后微信回调地址，api demo见notify_view_demo.py
