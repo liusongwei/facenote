@@ -122,7 +122,8 @@ def user_record(request):
             res['pic_num'] = 0
             res['day_count'] = 0
             res['product_count'] = 0
-            res['last_record_time'] = 0
+            last_record_time = datetime.datetime.utcnow() + datetime.timedelta(hours = 8)
+            res['last_record_time'] = int(time.mktime(last_record_time.timetuple()))
 
         return HttpResponse(json_util.dumps(res,ensure_ascii=False),content_type='application/x-www-form-urlencoded;charset=utf-8')
 
