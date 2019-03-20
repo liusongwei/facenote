@@ -199,3 +199,16 @@ def find_one_and_update(table, cond, value, upsert=False, return_document=Return
     except Exception:
         traceback.print_exc()
         raise
+
+@graceful_auto_reconnect
+def find_one_and_delete(table, value, field_filter = None):
+    try:
+        global my_conn
+        if field_filter:
+            return my_conn.db[table].find_one_and_delete(value, field_filter, max_time_ms=15000)
+        else:
+            return my_conn.db[table].find_one_and_delete(value, max_time_ms=15000)
+    except (Exception) as e:
+        print("update: ", e)
+        raise
+        # print(value)

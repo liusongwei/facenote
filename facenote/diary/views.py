@@ -484,3 +484,59 @@ def get_compare_pics(request):
             res.append(tmp)
         
         return HttpResponse(json_util.dumps(res,ensure_ascii=False),content_type='application/x-www-form-urlencoded;charset=utf-8')
+
+def del_server_image(image_url):
+    tail = image_url.split('/', 2)[2]
+    dir_path = os.path.join(BASE_DIR, "common_static", "images", "diary", tail).replace('\\', '/')
+    if os.path.isfile(dir_path):
+        logging.info(dir_path)
+        os.remove(dir_path)  
+
+def del_product_record(request):
+    if request.method == 'POST':
+        res = {}
+        req = json.loads(request.body)
+        logging.info(req)
+        token = req.get('token', None)
+        product_record_id = req.get('product_record_id', None)
+
+        db = MongoConn.find_one('token_ttl', {'token' : token})
+        if not db:
+            res['errcode'] = UNLOGIN
+            return HttpResponse(json_util.dumps(res,ensure_ascii=False),content_type='application/x-www-form-urlencoded;charset=utf-8')
+        openid = db.get('openid')
+        logging.info(openid)
+
+        product_record = MongoConn.find_one('product_record', {'_id' : ObjectId(product_record_id)})
+        logging.info(product_record)
+        if not product_record:
+            tmp = {}
+            tmp['errcode'] = UNKNOWN
+            return HttpResponse(json_util.dumps(tmp,ensure_ascii=False),content_type='application/x-www-form-urlencoded;charset=utf-8')
+        db_skin_record_id_list = product_record.get('skin_record', None)
+        product_image = product_record.get('image', None)
+        del_server_image(product_image)
+
+
+        user_record =  MongoConn.find_one('user_record', {'_id' : openid})
+        if not user_record['product_record']:
+            res['errcode'] = UNKNOWN
+            return HttpResponse(json_util.dumps(res,ensure_ascii=False),content_type='application/x-www-form-urlencoded;charset=utf-8')
+        user_record['product_record'].remove(product_record_id)
+        user_record['last_record_time'] = datetime.datetime.utcnow()
+        user_record['product_record_num'] -= 1
+        user_record['record_pic_num'] -= len(db_skin_record_id_list)
+        MongoConn.save('user_record', user_record)
+
+        logging.info(user_record)
+
+        for skin_record_id in db_skin_record_id_list:
+            skin_record = MongoConn.find_one('skin_record', {'_id' : ObjectId(skin_record_id)})
+            skin_image = skin_record.get('pics')[0]
+            del_server_image(skin_image)
+            MongoConn.find_one_and_delete('skin_record', {'_id' : ObjectId(skin_record_id)})
+
+        MongoConn.find_one_and_delete('product_record', {'_id' : ObjectId(product_record_id)})
+
+        res['errcode'] = OK
+        return HttpResponse(json_util.dumps(res,ensure_ascii=False),content_type='application/x-www-form-urlencoded;charset=utf-8')
