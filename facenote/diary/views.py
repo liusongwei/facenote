@@ -281,9 +281,9 @@ def upload_skin_record(request):
         update_tags_frequency(None, summary_tags)
 
         # today = datetime.datetime.now().strftime("%Y%m%d")
-        if not check_publish_limit(openid, product_record_id):
-            res['errcode'] = PUBLISHLIMIT
-            return HttpResponse(json_util.dumps(res,ensure_ascii=False),content_type='application/x-www-form-urlencoded;charset=utf-8')
+        # if not check_publish_limit(openid, product_record_id):
+        #     res['errcode'] = PUBLISHLIMIT
+        #     return HttpResponse(json_util.dumps(res,ensure_ascii=False),content_type='application/x-www-form-urlencoded;charset=utf-8')
 
         skin_record = {}
         skin_record['pics'] = skin_images
