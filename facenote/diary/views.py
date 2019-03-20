@@ -107,15 +107,21 @@ def user_record(request):
         openid = db.get('openid')
 
         db_record = MongoConn.find_one('user_record', {'_id' : openid})
-        res['pic_num'] = db_record.get('record_pic_num', 0)
-        res['day_count'] = db_record.get('record_days_num', 0)
-        res['product_count'] = db_record.get('product_record_num', 0)
-        db_time = db_record.get('last_record_time', None)
-        if db_time:
-            last_record_time = db_time + datetime.timedelta(hours = 8)
+        if db_record:
+            res['pic_num'] = db_record.get('record_pic_num', 0)
+            res['day_count'] = db_record.get('record_days_num', 0)
+            res['product_count'] = db_record.get('product_record_num', 0)
+            db_time = db_record.get('last_record_time', None)
+            if db_time:
+                last_record_time = db_time + datetime.timedelta(hours = 8)
             # last_record_time = db_time
-            res['last_record_time'] = int(time.mktime(last_record_time.timetuple()))
+                res['last_record_time'] = int(time.mktime(last_record_time.timetuple()))
+            else:
+                res['last_record_time'] = 0
         else:
+            res['pic_num'] = 0
+            res['day_count'] = 0
+            res['product_count'] = 0
             res['last_record_time'] = 0
 
         return HttpResponse(json_util.dumps(res,ensure_ascii=False),content_type='application/x-www-form-urlencoded;charset=utf-8')
