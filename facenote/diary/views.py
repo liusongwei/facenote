@@ -440,8 +440,8 @@ def get_hot_tags(request):
             tmp['errcode'] = UNLOGIN
             return HttpResponse(json_util.dumps(tmp,ensure_ascii=False),content_type='application/x-www-form-urlencoded;charset=utf-8')
 
-        effect_tags = MongoConn.find('effect_tags', None).sort('use_count', DESCENDING).limit(15)
-        summary_tags = MongoConn.find('summary_tags', None).sort('use_count', DESCENDING).limit(15)
+        effect_tags = MongoConn.find('effect_tags', None).sort('use_count', DESCENDING).limit(10)
+        summary_tags = MongoConn.find('summary_tags', None).sort('use_count', DESCENDING).limit(10)
 
         res['effect_tags'] = []
         res['summary_tags'] = []

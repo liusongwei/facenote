@@ -85,9 +85,9 @@ DATABASES = {
 MONGODB_CONFIG = {
     'host': '47.92.165.36',
     'port': 27017,
-    'db_name': 'test',
-    'username': None,
-    'password': None,
+    'db_name': 'online',
+    'username': 'online',
+    'password': 'online_rong',
 }
 
 MongoConn.init_conn(MONGODB_CONFIG)
